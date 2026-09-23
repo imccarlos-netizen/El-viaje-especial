@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Viaje Espacial de Byte: Rescate en la Estación Galáctica</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: radial-gradient(circle at center, #0B0F19 0%, #030712 100%);
+            color: #F3F4F6;
+            overflow-x: hidden;
+        }
+        .orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
+        }
+        .glow-box {
+            animation: pulseGlow 3s infinite;
+        }
+        @keyframes floatAnim {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .floating {
+            animation: floatAnim 4s ease-in-out infinite;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0F172A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3B82F6;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between select-none">
+
+    <div id="customModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-slate-900 border-2 border-blue-500/60 rounded-3xl max-w-md w-full p-6 shadow-2xl text-center glow-box">
+            <div id="modalIcon" class="text-5xl text-blue-400 mb-4">
+                <i class="fa-solid fa-circle-info"></i>
+            </div>
+            <h3 id="modalTitle" class="orbitron text-xl font-bold text-white mb-2">Aviso Estelar</h3>
+            <p id="modalMessage" class="text-slate-300 mb-6 leading-relaxed">Mensaje del sistema.</p>
+            <button onclick="closeModal()" class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-lg transition orbitron tracking-wider">
+                ¡ENTENDIDO!
+            </button>
+        </div>
+    </div>
+
+    <div id="contextMenu" class="hidden fixed z-50 bg-slate-900/95 border border-blue-500/50 rounded-2xl shadow-2xl backdrop-blur-md p-2 w-56 text-sm">
+        <div class="px-3 py-2 text-xs font-bold text-blue-400 uppercase tracking-wider border-b border-slate-800 mb-1 flex items-center justify-between">
+            <span>Menú Táctico Hangar</span>
+            <i class="fa-solid fa-robot"></i>
+        </div>
+        <button onclick="contextAction('recharge')" class="w-full text-left px-3 py-2 hover:bg-blue-600/30 rounded-xl flex items-center gap-2 transition text-slate-200">
+            <i class="fa-solid fa-battery-bolt text-emerald-400"></i> Recarga Estelar
+        </button>
+        <button onclick="contextAction('hint')" class="w-full text-left px-3 py-2 hover:bg-blue-600/30 rounded-xl flex items-center gap-2 transition text-slate-200">
+            <i class="fa-solid fa-lightbulb text-amber-400"></i> Pista de Byte
+        </button>
+        <button onclick="contextAction('menu')" class="w-full text-left px-3 py-2 hover:bg-red-600/30 rounded-xl flex items-center gap-2 transition text-red-300 border-t border-slate-800 mt-1 pt-2">
+            <i class="fa-solid fa-house-chimney"></i> Menú Principal
+        </button>
+    </div>
+
+    <header class="w-full bg-slate-900/80 backdrop-blur border-b border-blue-500/20 px-6 py-4 flex justify-between items-center z-40">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <i class="fa-solid fa-rocket text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="orbitron font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 text-sm md:text-base">EL VIAJE ESPACIAL DE BYTE</h1>
+                <p class="text-xs text-slate-400">Rescate en la Estación Galáctica (1° Primaria)</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="toggleAudio()" id="btnAudioToggle" class="px-3.5 py-2 bg-slate-800/80 hover:bg-slate-700 text-cyan-400 rounded-xl border border-cyan-500/30 text-xs font-bold transition flex items-center gap-2 orbitron" title="Activar/Desactivar Música y Sonidos">
+                <i class="fa-solid fa-volume-high" id="audioIcon"></i> <span class="hidden sm:inline">Audio</span>
+            </button>
+            <button onclick="openTeacherModal()" class="px-4 py-2 bg-slate-800/80 hover:bg-slate-700 text-amber-400 hover:text-amber-300 rounded-xl border border-amber-500/30 text-xs font-bold transition flex items-center gap-2 orbitron">
+                <i class="fa-solid fa-chalkboard-user"></i> <span class="hidden sm:inline">Docente</span>
+            </button>
+            <div id="userBadge" class="hidden items-center gap-2 bg-slate-800/90 px-3.5 py-1.5 rounded-xl border border-slate-700 text-xs">
+                <i class="fa-solid fa-user-astronaut text-cyan-400"></i>
+                <span id="displayStudentName" class="font-bold text-slate-200"></span>
+                <span class="text-slate-500">|</span>
+                <span id="displayStudentGroup" class="text-blue-300"></span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center p-4 relative">
+        
+        <!-- VISTA 1: PORTADA / REGISTRO DE ALUMNOS -->
+        <section id="viewRegistration" class="w-full max-w-xl bg-slate-900/95 border border-blue-500/30 rounded-3xl p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="text-center mb-8">
+                <div class="inline-block p-4 rounded-2xl bg-blue-600/20 border border-blue-500/40 text-blue-400 text-4xl mb-4 floating">
+                    <i class="fa-solid fa-satellite"></i>
+                </div>
+                <h2 class="orbitron text-2xl md:text-3xl font-extrabold text-white mb-2">REGISTRO DE CADETE</h2>
+                <p class="text-slate-400 text-sm">Ingresa tus datos para iniciar la aventura con Byte y dominar el ratón.</p>
+            </div>
+
+            <form id="registrationForm" onsubmit="handleRegistration(event)" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Nombre Completo del Alumno</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500">
+                            <i class="fa-solid fa-id-card"></i>
+                        </span>
+                        <input type="text" id="inputName" required placeholder="Ej. Mateo Pérez" class="w-full bg-slate-950/80 border border-slate-700 rounded-2xl px-4 py-3.5 pl-11 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Grado</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                            </span>
+                            <input type="text" readonly value="1° de Primaria" class="w-full bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3.5 pl-11 text-blue-300 font-semibold text-sm cursor-not-allowed">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Grupo</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500">
+                                <i class="fa-solid fa-users"></i>
+                            </span>
+                            <input type="text" id="inputGroup" required placeholder="Ej. Grupo A" class="w-full bg-slate-950/80 border border-slate-700 rounded-2xl px-4 py-3.5 pl-11 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-extrabold rounded-2xl shadow-xl shadow-blue-600/30 transition orbitron tracking-wider flex items-center justify-center gap-3 text-base mt-2">
+                    <span>INICIAR MISIÓN ESPACIAL</span>
+                    <i class="fa-solid fa-arrow-right-long"></i>
+                </button>
+            </form>
+        </section>
+
+        <!-- VISTA 2: MAPA DE NIVELES (7 MÓDULOS) -->
+        <section id="viewMap" class="hidden w-full max-w-5xl py-6 flex flex-col items-center">
+            <div class="text-center mb-8">
+                <h2 class="orbitron text-2xl md:text-3xl font-black text-white mb-2">CENTRO DE CONTROL GALÁCTICO</h2>
+                <p class="text-slate-400 text-sm">Selecciona un módulo. Cada minijuego requiere completar exactamente <span class="text-amber-400 font-bold">10 objetivos o estrellas</span>.</p>
+            </div>
+
+            <div id="levelsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full px-4">
+                <!-- Generado por JavaScript -->
+            </div>
+        </section>
+
+        <!-- VISTA 3: ÁREA DE JUEGO / MINIJUEGO ACTIVO -->
+        <section id="viewGame" class="hidden w-full max-w-4xl bg-slate-900/95 border border-blue-500/40 rounded-3xl p-6 shadow-2xl backdrop-blur-xl flex flex-col relative overflow-hidden">
+            <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800 mb-6">
+                <div>
+                    <span id="gameLevelBadge" class="text-xs font-bold px-3.5 py-1 bg-blue-600/30 text-blue-400 rounded-full border border-blue-500/30 orbitron">MÓDULO 1</span>
+                    <h3 id="gameLevelTitle" class="orbitron text-lg md:text-xl font-bold text-white mt-1">Título del Módulo</h3>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="text-right">
+                        <div class="text-xs text-slate-400 orbitron">PROGRESO DEL NIVEL</div>
+                        <div class="text-lg font-black text-amber-400 orbitron"><span id="currentStarsCount">0</span> / 10 <i class="fa-solid fa-star text-amber-400"></i></div>
+                    </div>
+                    <button onclick="returnToMap()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition flex items-center gap-2 orbitron border border-slate-700">
+                        <i class="fa-solid fa-arrow-left"></i> Mapa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenedor del Juego Interactivo -->
+            <div id="gamePlayArea" class="bg-slate-950/80 border border-slate-800 rounded-2xl p-6 min-h-[380px] flex flex-col items-center justify-center relative">
+                <!-- Dinámico según el nivel -->
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="w-full bg-slate-900/60 border-t border-slate-800 py-3 text-center text-xs text-slate-500 z-40 flex flex-col sm:flex-row items-center justify-between gap-4 px-6">
+        <p>© 2026 Colegios Mexicanos (Colmex) — El Viaje Espacial de Byte</p>
+        <button onclick="returnToMenu()" id="btnReturnMenu" class="hidden px-3.5 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-xl border border-red-500/30 text-xs font-bold transition orbitron flex items-center gap-2">
+            <i class="fa-solid fa-power-off"></i> Regresar al Menú de Registro
+        </button>
+    </footer>
+
+    <!-- MODAL PANEL DOCENTE PROTEGIDO -->
+    <div id="teacherModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+        <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-3xl w-full p-6 shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/40">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <div>
+                        <h3 class="orbitron text-lg font-bold text-white">PANEL DOCENTE PROTEGIDO</h3>
+                        <p class="text-xs text-slate-400">Supervisión y control de cadetes (Contraseña: Colmex2026)</p>
+                    </div>
+                </div>
+                <button onclick="closeTeacherModal()" class="text-slate-400 hover:text-white text-xl p-2">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Contraseña Docente -->
+            <div id="teacherLoginView" class="py-8 flex flex-col items-center text-center">
+                <div class="text-amber-400 text-4xl mb-4">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <p class="text-slate-300 text-sm mb-6 max-w-sm">Introduce la contraseña institucional para ver el progreso de los alumnos:</p>
+                <form onsubmit="verifyTeacherPassword(event)" class="w-full max-w-xs space-y-4">
+                    <input type="password" id="teacherPassInput" required placeholder="Contraseña..." class="w-full bg-slate-950 border border-slate-700 rounded-2xl px-4 py-3.5 text-white text-center placeholder-slate-600 focus:outline-none focus:border-amber-500 transition text-sm font-bold tracking-widest">
+                    <button type="submit" class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-slate-950 font-extrabold rounded-2xl shadow-lg transition orbitron tracking-wider text-sm">
+                        ACCEDER AL PANEL
+                    </button>
+                </form>
+            </div>
+
+            <!-- Tabla de Registros Docente -->
+            <div id="teacherDashboardView" class="hidden flex-1 flex flex-col overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xs font-bold text-amber-400 uppercase tracking-wider orbitron">Cadetes Registrados en la Estación</span>
+                    <button onclick="clearAllRecords()" class="px-3.5 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition flex items-center gap-2 orbitron">
+                        <i class="fa-solid fa-trash-can"></i> Borrar Todos los Registros
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto border border-slate-800 rounded-2xl bg-slate-950/60 p-2">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900 text-slate-400 uppercase orbitron border-b border-slate-800">
+                            <tr>
+                                <th class="p-3">Cadete</th>
+                                <th class="p-3">Grupo</th>
+                                <th class="p-3">Estrellas (Total / 70)</th>
+                                <th class="p-3 text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody" class="divide-y divide-slate-800/60">
+                            <!-- Dinámico -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- MOTOR DE AUDIO WEB API PROCEDURAL ---
+        let audioCtx = null;
+        let isAudioEnabled = true;
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!isAudioEnabled) return;
+            try {
+                initAudioContext();
+                if (!audioCtx) return;
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'laser') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(150, now + 0.2);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'error') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.setValueAtTime(120, now + 0.1);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                }
+            } catch (e) {
+                console.log("Audio Web API bloqueado temporalmente por navegador.");
+            }
+        }
+
+        function toggleAudio() {
+            isAudioEnabled = !isAudioEnabled;
+            const icon = document.getElementById('audioIcon');
+            if (isAudioEnabled) {
+                icon.className = "fa-solid fa-volume-high";
+                playSound('success');
+            } else {
+                icon.className = "fa-solid fa-volume-xmark";
+            }
+        }
+
+        // --- ESTADO GLOBAL Y DATOS DE LA APLICACIÓN ---
+        let gameState = {
+            studentName: '',
+            studentGroup: '',
+            currentLevel: 1,
+            levelStars: [0, 0, 0, 0, 0, 0, 0]
+        };
+
+        const levelsData = [
+            { id: 1, title: "Módulo 1.1: Ensamblaje del Ratón", icon: "fa-computer-mouse", desc: "Arma las 10 piezas del dispositivo ratón." },
+            { id: 2, title: "Módulo 1.2: Clics Izquierdo y Derecho", icon: "fa-hand-pointer", desc: "Alterna 10 clics de precisión en los botones." },
+            { id: 3, title: "Módulo 2.1: Estrellas Fugaces", icon: "fa-star", desc: "Captura 10 estrellas fugaces con tu puntero." },
+            { id: 4, title: "Módulo 2.2: Destructor de Asteroides", icon: "fa-meteor", desc: "Dispara láseres a 10 asteroides invasores." },
+            { id: 5, title: "Módulo 2.3: Menú Contextual", icon: "fa-bars", desc: "Usa el clic derecho 10 veces en los paneles." },
+            { id: 6, title: "Módulo 2.4: Hiperpropulsor (Doble Clic)", icon: "fa-battery-full", desc: "Realiza 10 dobles clics y llena la batería." },
+            { id: 7, title: "Módulo 2.5: Cristales Espaciales", icon: "fa-gem", desc: "Arrastra y suelta 10 cristales espaciales." }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setupContextMenuListeners();
+        });
+
+        // --- REGISTRO DE ALUMNOS ---
+        function handleRegistration(e) {
+            e.preventDefault();
+            const name = document.getElementById('inputName').value.trim();
+            const group = document.getElementById('inputGroup').value.trim();
+            if (!name || !group) return;
+
+            gameState.studentName = name;
+            gameState.studentGroup = group;
+            saveStudentRecords();
+
+            document.getElementById('displayStudentName').innerText = name;
+            document.getElementById('displayStudentGroup').innerText = group;
+            document.getElementById('userBadge').classList.remove('hidden');
+            document.getElementById('btnReturnMenu').classList.remove('hidden');
+
+            transitionView('viewRegistration', 'viewMap');
+            renderLevelsMap();
+            playSound('success');
+            showModal("¡Bienvenido, Cadete!", `Hola ${name}. Has ingresado a la Estación Galáctica de Colmex. ¡Byte te espera en el mapa estelar!`, "fa-rocket");
+        }
+
+        function transitionView(hideId, showId) {
+            document.getElementById(hideId).classList.add('hidden');
+            document.getElementById(showId).classList.remove('hidden');
+        }
+
+        function returnToMenu() {
+            transitionView('viewGame', 'viewMap');
+            transitionView('viewMap', 'viewRegistration');
+            document.getElementById('userBadge').classList.add('hidden');
+            document.getElementById('btnReturnMenu').classList.add('hidden');
+            showModal("Menú Principal", "Has regresado a la pantalla de registro de cadetes.", "fa-house");
+        }
+
+        // --- MAPA DE NIVELES ---
+        function renderLevelsMap() {
+            const grid = document.getElementById('levelsGrid');
+            grid.innerHTML = '';
+
+            levelsData.forEach((lvl, idx) => {
+                const stars = gameState.levelStars[idx] || 0;
+                const isCompleted = stars >= 10;
+                const isUnlocked = idx === 0 || gameState.levelStars[idx - 1] >= 10;
+
+                let cardClass = "bg-slate-900/90 border-slate-800 hover:border-blue-500/50 cursor-pointer";
+                if (!isUnlocked) cardClass = "bg-slate-950/40 border-slate-900/60 opacity-50 cursor-not-allowed";
+                if (isCompleted) cardClass = "bg-slate-900/95 border-emerald-500/60 shadow-emerald-500/10";
+
+                const card = document.createElement('div');
+                card.className = `border rounded-3xl p-6 transition-all duration-300 flex flex-col justify-between relative overflow-hidden ${cardClass}`;
+                if (isUnlocked) {
+                    card.onclick = () => startLevel(lvl.id);
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 text-xl">
+                            <i class="fa-solid ${lvl.icon}"></i>
+                        </div>
+                        <span class="text-xs font-bold px-3 py-1 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : (isUnlocked ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-slate-800 text-slate-500')}">
+                            ${isCompleted ? '¡COMPLETADO!' : (isUnlocked ? 'DISPONIBLE' : 'BLOQUEADO')}
+                        </span>
+                    </div>
+                    <div>
+                        <h4 class="orbitron font-bold text-white text-base mb-1">${lvl.title}</h4>
+                        <p class="text-xs text-slate-400 mb-4">${lvl.desc}</p>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-800/80 text-xs">
+                        <span class="text-slate-400 orbitron">OBJETIVOS:</span>
+                        <span class="font-extrabold text-amber-400 text-sm orbitron">${stars} / 10 <i class="fa-solid fa-star"></i></span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function startLevel(levelId) {
+            gameState.currentLevel = levelId;
+            const lvlInfo = levelsData[levelId - 1];
+
+            document.getElementById('gameLevelBadge').innerText = `MÓDULO ${levelId}`;
+            document.getElementById('gameLevelTitle').innerText = lvlInfo.title;
+            document.getElementById('currentStarsCount').innerText = gameState.levelStars[levelId - 1];
+
+            transitionView('viewMap', 'viewGame');
+            renderMiniGame(levelId);
+        }
+
+        function returnToMap() {
+            transitionView('viewGame', 'viewMap');
+            renderLevelsMap();
+        }
+
+        // --- ROUTER DE MINIJUEGOS (TODOS CON 10 OBJETIVOS SIN BLOQUEOS) ---
+        function renderMiniGame(levelId) {
+            const area = document.getElementById('gamePlayArea');
+            area.innerHTML = '';
+
+            const currentProgress = gameState.levelStars[levelId - 1];
+
+            if (currentProgress >= 10) {
+                renderVictoryScreen(area, levelId);
+                return;
+            }
+
+            if (levelId === 1) renderMouseAssemblyGame(area, currentProgress);
+            else if (levelId === 2) renderClickAlternatingGame(area, currentProgress);
+            else if (levelId === 3) renderStarShooterGame(area, currentProgress);
+            else if (levelId === 4) renderAsteroidGame(area, currentProgress);
+            else if (levelId === 5) renderContextMenuGame(area, currentProgress);
+            else if (levelId === 6) renderDoubleClickGame(area, currentProgress);
+            else if (levelId === 7) renderDragDropGame(area, currentProgress);
+        }
+
+        function renderVictoryScreen(area, levelId) {
+            const isLast = (levelId === 7);
+            area.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="text-6xl text-emerald-400 mb-4 animate-bounce">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h4 class="orbitron text-xl font-bold text-white mb-2">${isLast ? '¡MISIÓN ESTELAR COMPLETADA!' : '¡MÓDULO SUPERADO!'}</h4>
+                    <p class="text-slate-300 text-sm mb-6">${isLast ? '¡Felicidades! Has rescatado la Estación Galáctica con ayuda de Byte y dominado todas las habilidades de computación.' : 'Has completado los 10 objetivos de este sector.'}</p>
+                    <button onclick="${isLast ? 'returnToMenu()' : 'returnToMap()'}" class="px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold rounded-2xl shadow-lg transition orbitron tracking-wider">
+                        ${isLast ? 'Regresar al Menú' : 'REGRESAR AL MAPA GALÁCTICO'}
+                    </button>
+                </div>
+            `;
+            playSound('success');
+        }
+
+        function updateProgress(levelId, newCount) {
+            gameState.levelStars[levelId - 1] = newCount;
+            document.getElementById('currentStarsCount').innerText = newCount;
+            saveStudentRecords();
+            playSound('click');
+
+            if (newCount >= 10) {
+                playSound('success');
+                setTimeout(() => renderMiniGame(levelId), 300);
+            } else {
+                renderMiniGame(levelId);
+            }
+        }
+
+        // MÓDULO 1.1: Armar el Ratón (10 piezas)
+        function renderMouseAssemblyGame(area, progress) {
+            area.innerHTML = `
+                <div class="text-center mb-4">
+                    <p class="text-slate-300 text-sm">Haz clic en las 10 piezas para ensamblar el dispositivo Ratón de la nave (${progress}/10):</p>
+                </div>
+                <div id="piecesGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-4 w-full max-w-2xl py-4"></div>
+            `;
+            const grid = document.getElementById('piecesGrid');
+            const parts = ["Cable USB", "Botón Izq", "Botón Der", "Rueda Scroll", "Carcasa Sup", "Sensor Óptico", "Placa Base", "Memoria Chip", "Carcasa Inf", "Batería Láser"];
+            
+            parts.forEach((part, idx) => {
+                const collected = idx < progress;
+                const btn = document.createElement('button');
+                btn.className = `p-4 rounded-2xl border flex flex-col items-center justify-center gap-2 transition ${collected ? 'bg-emerald-600/20 border-emerald-500 text-emerald-400 cursor-default' : 'bg-slate-900 border-slate-700 hover:border-blue-500 hover:bg-blue-600/10 text-slate-300 cursor-pointer'}`;
+                
+                if (!collected) {
+                    btn.onclick = () => updateProgress(1, progress + 1);
+                    btn.innerHTML = `<i class="fa-solid fa-puzzle-piece text-2xl text-blue-400"></i><span class="text-[11px] font-bold orbitron">${part}</span>`;
+                } else {
+                    btn.innerHTML = `<i class="fa-solid fa-circle-check text-2xl text-emerald-400"></i><span class="text-[11px] font-bold orbitron text-emerald-400">¡Ensamblado!</span>`;
+                }
+                grid.appendChild(btn);
+            });
+        }
+
+        // MÓDULO 1.2: Clics Izquierdo y Derecho (10 clics alternados)
+        function renderClickAlternatingGame(area, progress) {
+            const expectRight = (progress % 2 === 1);
+            area.innerHTML = `
+                <div class="text-center mb-4">
+                    <p class="text-slate-300 text-sm">Realiza los 10 clics alternados requeridos (${progress}/10):</p>
+                    <p class="text-xs font-bold text-cyan-400 mt-1 orbitron">ACCIÓN REQUERIDA: <span class="text-amber-400 text-sm">${expectRight ? 'CLIC DERECHO' : 'CLIC IZQUIERDO'}</span></p>
+                </div>
+                <div class="flex flex-wrap justify-center gap-6 py-6">
+                    <button id="btnLeft" class="px-8 py-6 bg-slate-900 hover:bg-blue-600/20 border border-slate-700 hover:border-blue-500 rounded-2xl text-center transition flex flex-col items-center gap-2">
+                        <i class="fa-solid fa-computer-mouse text-3xl text-blue-400"></i>
+                        <span class="orbitron font-bold text-sm">BOTÓN IZQUIERDO</span>
+                    </button>
+                    <button id="btnRight" oncontextmenu="handleRightClickTest(event, ${progress}); return false;" class="px-8 py-6 bg-slate-900 hover:bg-indigo-600/20 border border-slate-700 hover:border-indigo-500 rounded-2xl text-center transition flex flex-col items-center gap-2">
+                        <i class="fa-solid fa-computer-mouse text-3xl text-indigo-400"></i>
+                        <span class="orbitron font-bold text-sm">BOTÓN DERECHO (Menú)</span>
+                    </button>
+                </div>
+            `;
+            document.getElementById('btnLeft').onclick = () => {
+                if (!expectRight) updateProgress(2, progress + 1);
+                else { playSound('error'); showModal("Error de Clic", "Se requería un Clic Derecho. ¡Inténtalo de nuevo!", "fa-triangle-exclamation"); }
+            };
+        }
+
+        function handleRightClickTest(e, progress) {
+            e.preventDefault();
+            const expectRight = (progress % 2 === 1);
+            if (expectRight) updateProgress(2, progress + 1);
+            else { playSound('error'); showModal("Error de Clic", "Se requería un Clic Izquierdo. ¡Inténtalo de nuevo!", "fa-triangle-exclamation"); }
+        }
+
+        // MÓDULO 2.1: Recolección Estelar con Puntero (10 estrellas)
+        function renderStarShooterGame(area, progress) {
+            area.innerHTML = `
+                <div class="text-center mb-4">
+                    <p class="text-slate-300 text-sm">Haz clic en las 10 estrellas fugaces que aparecen en el sector (${progress}/10):</p>
+                </div>
+                <div id="starsArea" class="w-full h-64 bg-slate-950 border border-slate-800 rounded-2xl relative overflow-hidden flex items-center justify-center">
+                    <button id="starTarget" class="absolute p-4 text-amber-400 text-3xl hover:scale-125 transition animate-pulse cursor-pointer">
+                        <i class="fa-solid fa-star"></i>
+                    </button>
+                </div>
+            `;
+            const star = document.getElementById('starTarget');
+            moveStarRandomly(star);
+            star.onclick = () => {
+                playSound('click');
+                updateProgress(3, progress + 1);
+            };
+        }
+
+        function moveStarRandomly(el) {
+            const x = Math.floor(Math.random() * 260) - 130;
+            const y = Math.floor(Math.random() * 120) - 60;
+            el.style.transform = `translate(${x}px, ${y}px)`;
+        }
+
+        // MÓDULO 2.2: Destruir 10 Asteroides con Láser (Clic)
+        function renderAsteroidGame(area, progress) {
+            area.innerHTML = `
+                <div class="text-center mb-4">
+                    <p class="text-slate-300 text-sm">Dispara el láser estelar destruyendo 10 asteroides (${progress}/10):</p>
+                </div>
+                <div id="asteroidArea" class="w-full h-64 bg-slate-950 border border-slate-800 rounded-2xl relative overflow-hidden flex items-center justify-center">
+                    <button id="asteroidTarget" class="absolute p-4 text-slate-300 text-4xl hover:text-red-500 hover:scale-110 transition cursor-pointer">
+                        <i class="fa-solid fa-meteor"></i>
+                    </button>
+                </div>
+            `;
+            const ast = document.getElementById('asteroidTarget');
+            moveStarRandomly(ast);
+            ast.onclick = () => {
+                playSound('laser');
+                updateProgress(4, progress + 1);
+            };
+        }
+
+        // MÓDULO 2.3: Menú Contextual de Hangar (10 clics derechos)
+        function renderContextMenuGame(area, progress) {
+            area.innerHTML = `
+                <div class="text-center mb-4">
+                    <p class="text-slate-300 text-sm">Haz <span class="text-cyan-400 font-bold">Clic Derecho</span> sobre el panel de control 10 veces (${progress}/10):</p>
+                </div>
+                <div class="flex justify-center py-8">
+                    <div id="hangarPanel" oncontextmenu="handleHangarContext(event, ${progress}); return false;" class="w-64 h-40 bg-gradient-to-br from-slate-900 to-slate-950 border-2 border-dashed border-blue-500/50 hover:border-blue-400 rounded-3xl flex flex-col items-center justify-center gap-3 cursor-context shadow-lg">
+                        <i class="fa-solid fa-server text-4xl text-blue-400"></i>
+                        <span class="orbitron font-bold text-xs text-slate-300">PANEL DE CONTROL HANGAR</span>
+                        <span class="text-[10px] text-slate-500">(Haz Clic Derecho aquí)</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleHangarContext(e, progress) {
+            e.preventDefault();
+            playSound('click');
+            updateProgress(5, progress + 1);
+        }
+
+        // MÓDULO 2.4: Hiperpropulsor - Doble Clic con Barra de Batería Interactiva (0% a 100%)
+        function renderDoubleClickGame(area, progress) {
+            const percentage = progress * 10;
+            area.innerHTML = `
+                <div class="text-center mb-4">
+                    <p class="text-slate-300 text-sm">¡Haz <span class="text-emerald-400 font-bold">DOBLE CLIC</span> rápido sobre el propulsor estelar para cargar la batería (${progress}/10):</p>
+                </div>
+                <div class="flex flex-col items-center gap-6 py-4">
+                    <button id="propulsorBtn" class="w-32 h-32 rounded-3xl bg-gradient-to-tr from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 shadow-2xl flex flex-col items-center justify-center gap-2 transition transform active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-rocket text-4xl text-white"></i>
+                        <span class="orbitron text-xs font-bold text-white">PROPULSOR</span>
+                    </button>
+                    
+                    <!-- Barra de Batería Requerida (#battery-fill y #battery-text) -->
+                    <div class="w-full max-w-md bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                        <div class="flex justify-between text-xs orbitron mb-2">
+                            <span class="text-slate-400">NIVEL DE BATERÍA</span>
+                            <span id="battery-text" class="text-emerald-400 font-bold">${percentage}%</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-5 p-0.5 overflow-hidden border border-slate-800">
+                            <div id="battery-fill" class="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 rounded-full transition-all duration-300" style="width: ${percentage}%;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const btn = document.getElementById('propulsorBtn');
+            btn.ondblclick = (e) => {
+                e.preventDefault();
+                if (progress < 10) {
+                    playSound('success');
+                    updateProgress(6, progress + 1);
+                }
+            };
+        }
+
+        // MÓDULO 2.5: Cristales del Núcleo (Arrastrar y Soltar 10 cristales)
+        function renderDragDropGame(area, progress) {
+            area.innerHTML = `
+                <div class="text-center mb-4">
+                    <p class="text-slate-300 text-sm">Arrastra y suelta los cristales espaciales al núcleo (${progress}/10):</p>
+                </div>
+                <div class="flex flex-col sm:flex-row items-center justify-around gap-6 py-4 w-full">
+                    <div id="sourceCrystal" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', 'crystal')" class="w-28 h-28 bg-blue-600/20 border-2 border-blue-500 hover:bg-blue-600/30 rounded-3xl flex flex-col items-center justify-center gap-2 cursor-grab shadow-lg">
+                        <i class="fa-solid fa-gem text-3xl text-cyan-400 animate-pulse"></i>
+                        <span class="orbitron text-[10px] font-bold text-slate-200">CRISTAL</span>
+                    </div>
+                    <div ondragover="event.preventDefault()" ondrop="handleCrystalDrop(${progress})" class="w-48 h-36 bg-slate-950 border-2 border-dashed border-emerald-500/50 hover:border-emerald-400 rounded-3xl flex flex-col items-center justify-center gap-2 shadow-xl">
+                        <i class="fa-solid fa-vault text-3xl text-emerald-400"></i>
+                        <span class="orbitron text-xs font-bold text-slate-300">NÚCLEO ESTELAR</span>
+                        <span class="text-[10px] text-slate-500">(Suelta aquí)</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleCrystalDrop(progress) {
+            playSound('success');
+            updateProgress(7, progress + 1);
+        }
+
+        // --- MENÚ CONTEXTUAL GLOBAL (CLIC DERECHO) ---
+        function setupContextMenuListeners() {
+            const menu = document.getElementById('contextMenu');
+            window.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                menu.style.top = `${Math.min(e.clientY, window.innerHeight - 220)}px`;
+                menu.style.left = `${Math.min(e.clientX, window.innerWidth - 240)}px`;
+                menu.classList.remove('hidden');
+            });
+            window.addEventListener('click', () => {
+                menu.classList.add('hidden');
+            });
+        }
+
+        function contextAction(action) {
+            document.getElementById('contextMenu').classList.add('hidden');
+            if (action === 'recharge') {
+                showModal("Recarga Táctica", "¡Sistemas de la estación al 100%! El ratón responde con precisión estelar.", "fa-battery-full");
+            } else if (action === 'hint') {
+                showModal("Pista de Byte", "Recuerda completar cada uno de los 10 objetivos por nivel en orden para desbloquear el siguiente sector.", "fa-lightbulb");
+            } else if (action === 'menu') {
+                returnToMenu();
+            }
+        }
+
+        // --- PANEL DOCENTE Y LOCALSTORAGE ---
+        function openTeacherModal() {
+            document.getElementById('teacherModal').classList.remove('hidden');
+            document.getElementById('teacherLoginView').classList.remove('hidden');
+            document.getElementById('teacherDashboardView').classList.add('hidden');
+            document.getElementById('teacherPassInput').value = '';
+        }
+
+        function closeTeacherModal() {
+            document.getElementById('teacherModal').classList.add('hidden');
+        }
+
+        function verifyTeacherPassword(e) {
+            e.preventDefault();
+            const pass = document.getElementById('teacherPassInput').value.trim();
+            if (pass === 'Colmex2026') {
+                document.getElementById('teacherLoginView').classList.add('hidden');
+                document.getElementById('teacherDashboardView').classList.remove('hidden');
+                renderStudentsTable();
+                playSound('success');
+            } else {
+                playSound('error');
+                showModal("Contraseña Incorrecta", "La clave institucional de acceso docente no es válida. (Colmex2026)", "fa-triangle-exclamation");
+            }
+        }
+
+        function saveStudentRecords() {
+            if (!gameState.studentName) return;
+            let records = JSON.parse(localStorage.getItem('colmex_space_records') || '[]');
+            let existing = records.find(r => r.name === gameState.studentName && r.group === gameState.studentGroup);
+            
+            if (existing) {
+                existing.stars = [...gameState.levelStars];
+            } else {
+                records.push({
+                    name: gameState.studentName,
+                    group: gameState.studentGroup,
+                    stars: [...gameState.levelStars]
+                });
+            }
+            localStorage.setItem('colmex_space_records', JSON.stringify(records));
+        }
+
+        function renderStudentsTable() {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+
+            let records = JSON.parse(localStorage.getItem('colmex_space_records') || '[]');
+            if (records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No hay cadetes registrados aún en este equipo.</td></tr>`;
+                return;
+            }
+
+            records.forEach((rec, index) => {
+                const totalStars = rec.stars.reduce((a, b) => a + b, 0);
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-900/50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-user-astronaut text-blue-400"></i> ${rec.name}
+                    </td>
+                    <td class="p-3 text-slate-300">${rec.group}</td>
+                    <td class="p-3 text-amber-400 font-bold orbitron">${totalStars} / 70 <i class="fa-solid fa-star text-xs"></i></td>
+                    <td class="p-3 text-center">
+                        <button onclick="deleteStudentRecord(${index})" class="p-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-xl transition" title="Eliminar registro">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteStudentRecord(index) {
+            let records = JSON.parse(localStorage.getItem('colmex_space_records') || '[]');
+            records.splice(index, 1);
+            localStorage.setItem('colmex_space_records', JSON.stringify(records));
+            renderStudentsTable();
+            playSound('click');
+        }
+
+        function clearAllRecords() {
+            localStorage.removeItem('colmex_space_records');
+            renderStudentsTable();
+            showModal("Base de Datos Limpia", "Se han eliminado todos los registros del panel docente.", "fa-trash-can");
+        }
+
+        // --- MODAL GENERAL (SIN ALERT/CONFIRM) ---
+        function showModal(title, message, iconClass) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message;
+            document.getElementById('modalIcon').innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
